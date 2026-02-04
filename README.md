@@ -25,7 +25,7 @@ Donde:
 
 | Herramienta | Uso |
 | :--- | :--- |
-| **Python 3.x** | Lenguaje base del proyecto. |
+| **Python 3.14** | Lenguaje base del proyecto. |
 | **Streamlit** | Framework para la creación de la interfaz web. |
 | **Pandas** | Manipulación y análisis de estructuras de datos. |
 | **Plotly** | Generación de gráficos interactivos. |
