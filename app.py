@@ -4,7 +4,7 @@ import plotly.express as px
 
 # configuracion principal de la pagina
 st.set_page_config(
-    page_title="LVBP Stars Dashboard",
+    page_title="LVBP Analisis Dashboard",
     page_icon="⚾",
     layout= "wide"
 )
