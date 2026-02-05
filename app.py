@@ -2,29 +2,42 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# --- CONFIGURACIÓN DE LA PÁGINA (Mejora la UX/UI) ---
+# configuracion principal de la pagina
 st.set_page_config(
     page_title="LVBP Stars Dashboard",
     page_icon="⚾",
     layout= "wide"
 )
 
-# El código limpia y transforma los datos para análisis.
+#para procesar los datos
 def cargar_y_procesar():
     df = pd.read_csv('jugadores_lvbp.csv') 
     df['AVG'] = (df['H'] / df['VB']).round(3)
+    df['Poder'] = (df['HR'] * 10) + (df['AVG'] * 1000)
     df.index = range(1, len(df) + 1)
     return df
 
 df = cargar_y_procesar()
 
+#barrra lateral
+st.sidebar.header("🔍 Panel de Control")
+equipo = st.sidebar.selectbox("Selecciona un Equipo:", ['Todos'] + list(df['Equipo'].unique()))
+nombre_buscar = st.sidebar.text_input("Buscar Jugador por nombre:")
+
+df_final = df.copy()
+if equipo != 'Todos':
+    df_final = df_final[df_final['Equipo'] == equipo]
+if nombre_buscar:
+    df_final = df_final[df_final['Nombre'].str.contains(nombre_buscar, case=False)]
+
+df_final.index = range(1, len(df_final) + 1)
+
+#titulo principal
 st.title("⚾ LVBP Analisis: Temporada 2025-2026")
 st.markdown("---")
 
-
+#pandas para metricas
 col1, col2, col3 = st.columns(3)
-
-# Calculamos líderes usando pandas
 lider_hr = df.loc[df['HR'].idxmax()]
 lider_avg = df.loc[df['AVG'].idxmax()]
 
@@ -37,27 +50,36 @@ with col3:
 
 st.markdown("---")
 
-# Barra lateral para navegación
-st.sidebar.header("Panel de Filtros")
-equipo = st.sidebar.selectbox("Selecciona un Equipo:", ['Todos'] + list(df['Equipo'].unique()))
+st.subheader(f"📊 Gráfico de Rendimiento: {equipo}")
 
-if equipo != 'Todos':
-    df_final = df[df['Equipo'] == equipo]
-else:
-    df_final = df
+# 1. Definimos los colores oficiales de TODOS los equipos
+colores_equipos = {
+    'Leones': "#FBAB33",       # Amarillo
+    'Magallanes': '#0047AB', # Azul Eléctrico
+    'Tiburones': '#E74C3C',    # Rojo/Samba
+    'Cardenales': '#C0392B',        # Rojo Cardenal
+    'Tigres': '#000080',          # Azul Marino (o Naranja #F39C12 si prefieres)
+    'Aguilas': '#FF8C00',         # Naranja
+    'Bravos': '#00FFFF',       # Cian/Turquesa
+    'Caribes': '#FFD700'      # Dorado/Naranja
+}
 
-st.subheader(f"📊 Análisis de Jugadores: {equipo}")
-# Usamos plotly
+# 2. Configuración inteligente del gráfico
 fig = px.bar(
     df_final, 
     x='HR', 
     y='Nombre', 
     orientation='h',
-    color='AVG', # El color cambia según el promedio
-    title=f"Jonrones y Rendimiento: {equipo}",
-    labels={'HR': 'Jonrones', 'AVG': 'Promedio de Bateo'},
+    
+    # AQUÍ ESTÁ LA CLAVE:
+    color='Equipo',  # <-- Le dice a Plotly: "Pinta según el equipo del jugador"
+    color_discrete_map=colores_equipos, # <-- "Usa este diccionario para saber qué color toca"
+    
+    title=f"Jonrones por Jugador: {equipo}",
+    labels={'HR': 'Jonrones', 'AVG': 'Promedio', 'Equipo': 'Club'},
     template="plotly_dark"
 )
+
 fig.update_layout(yaxis={'categoryorder':'total ascending'})
 st.plotly_chart(fig, use_container_width=True)
 
@@ -68,7 +90,7 @@ st.dataframe(df_final, use_container_width=True)
 
 st.markdown("---")
 
-st.write("**Proyecto realizado por:**")
+st.write("**Equipo de trabajo**")
 st.write("- Juan Jaure")
 st.write("- Darwin Mendoza")
 st.write("- Rayan Herrera")
