@@ -10,6 +10,7 @@ st.set_page_config(
 )
 
 #para procesar los datos
+@st.cache_data
 def cargar_y_procesar():
     df = pd.read_csv('jugadores_lvbp.csv') 
     df['AVG'] = (df['H'] / df['VB']).round(3)
